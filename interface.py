@@ -34,21 +34,29 @@ def report_error(msg, blinks=3):
 
     for i in range(blinks):
         cmdStatusLED.color = colorError
-        sleep(0.4)
+        sleep(0.2)
         cmdStatusLED.color = colorOFF
-        sleep(0.1)
+        sleep(0.8)
 
     cmdStatusLED.color = origColor
+
+# Setup logging
+logging.basicConfig(filename='pnoi.log', encoding='utf-8', level=logging.DEBUG)
+
+logging.info("Starting Pnoi server interface...")
+logging.debug("working dir = " + os.getcwd())
+
+logging.debug("Setting up LEDs...")
 
 # Turn off both LEDs
 connStateLED.off()
 cmdStatusLED.color = colorOFF
 
+logging.debug("Running hciconfig hci0 piscan...")
+
 # Make Bluetooth interface discoverable
 os.system("sudo hciconfig hci0 piscan")
 
-# Setup logging
-logging.basicConfig(filename='pnoi.log', encoding='utf-8', level=logging.DEBUG)
 
 while True:
     # Setup server connection
@@ -111,15 +119,18 @@ while True:
                 cmdStatusLED.color = colorTransferring 
 
                 mac_addr = client_info[0]
-                logging.info("Transferring file to" + str(mac_addr))
+                logging.info("Transferring file to " + str(mac_addr))
 
                 try:
                     logging.debug("Finding OBEX channel number on host...")
-                    channel_n = int(subprocess.run("./scripts/find_obex_channel.sh " + mac_addr,
-                                                   shell=True, capture_output=True,
-                                                   check=True
-                                                  ).stdout
-                                   )
+                    find_obex_channel = subprocess.run("./scripts/find_obex_channel.sh "
+                                                        + mac_addr, shell=True,
+                                                        capture_output=True
+                                                      )
+
+                    find_obex_channel.check_returncode() # Handled below via CalledProcessError
+
+                    channel_n = int(find_obex_channel.stdout)
 
                     logging.debug("Sending request for file transfer to"
                             + str(mac_addr) + "...")
