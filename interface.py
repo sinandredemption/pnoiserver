@@ -14,14 +14,13 @@ import gpiozero
 from time import sleep
 
 # Declerations
-colorOFF          = (1,1,1)
+colorOFF          = (0,0,0)
 colorReady        = (1,1,0)
 colorRecording    = (1,0,1)
 colorTransferring = (0,0,1)
 colorError        = (0,1,1)
 
 # Two LEDs are used to denote the current connection state and command status
-connStateLED = gpiozero.LED(17) # On if connected to a bluetooth device
 cmdStatusLED = gpiozero.RGBLED(red=23, green=27, blue=22)
 
 def report_error(msg, blinks=3):
@@ -49,7 +48,6 @@ logging.debug("working dir = " + os.getcwd())
 logging.debug("Setting up LEDs...")
 
 # Turn off both LEDs
-connStateLED.off()
 cmdStatusLED.color = colorOFF
 
 logging.debug("Running hciconfig hci0 piscan...")
@@ -82,7 +80,6 @@ while True:
     # At this point, we're connected to a bluetooth device, so start listening for commands
     logging.info("Listening for commands from" + str(client_info))
 
-    connStateLED.on()
     cmdStatusLED.color = colorReady 
 
     isRecording = False # Prevent transfers while recording 
@@ -152,7 +149,6 @@ while True:
 
     logging.info("Disconnected. Ending session...")
 
-    connStateLED.off()
     cmdStatusLED.color = colorOFF
 
     client_sock.close()
