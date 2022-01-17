@@ -41,7 +41,7 @@ def report_error(msg, blinks=3):
     cmdStatusLED.color = origColor
 
 # Setup logging
-logging.basicConfig(filename='pnoi.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='pnoi.log', level=logging.DEBUG)
 
 logging.info("Starting Pnoi server interface...")
 logging.debug("working dir = " + os.getcwd())
